@@ -5,28 +5,41 @@ import axios from "axios"
 
 export const PropsComponent=(props)=>{
     const [likes,setLikes]=useState([])
-    const [flag,chanegFlag]=useState(false)
+    const [flag,changeFlag]=useState(false)
+    const [flagC,changeFlagC]=useState(false)
+    const [comments,setComments]=useState([])
     useEffect(()=>{
-        const fetch=async()=>{
+        const fetchLikes=async()=>{
             axios.get(`${process.env.REACT_APP_SERVER_API}/like/get/${props.post.postid}`)
             .then(data=>{
                 setLikes(data.data.list)
-                chanegFlag(true)
-                console.log(data.data.list)
+                changeFlag(true)
             })
             .catch(err=>{
                 console.log(err)
             })
         }
-        fetch()
+        fetchLikes()
+        const fetchComment=async()=>{
+            axios.get(`${process.env.REACT_APP_SERVER_API}/comment/get/${props.post.postid}`)
+            .then(res=>{
+                setComments(res.data.list)
+                changeFlagC(true)
 
-    } ,[flag])
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+        }
+        fetchComment()
+    } ,[flag,flagC])
     return (
         <>
             <Post
               key={props.post.postid}
               post={props.post}
               likes={likes}
+              comments={comments}
               rerenderFeed={props.rerenderFeed}
               onChange={props.onChange}
             ></Post>

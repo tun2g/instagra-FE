@@ -13,11 +13,14 @@ import Backdrop from "./UI/Backdrop";
 
 function Post(props) {
   const post = props.post;
-  post.comment=[]
+  
   const { user } = useContext(AuthContext);
-  const [likes, setLikes] = useState(props.likes.length);
+
+  const [likes, setLikes] = useState(0);
+  const [comments, setCountComments] = useState(0);
+  
   const [isLiked, setIsLiked] = useState(false);
-  const [Countcomments, setCountComments] = useState(post.comment.length);
+  
   const [showPost, setShowPost] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -25,9 +28,13 @@ function Post(props) {
     const listUserLike = props.likes?.map((p)=>{
       return p.userid 
     })
+
     setIsLiked(listUserLike.includes(user.data.userid));
+
+    // render -> UI 
     setLikes(props.likes.length)
-  }, [props.likes]);
+    setCountComments(props.comments.length)
+  }, [props.likes,props.comments]);
 
   const deleteHandler = async () => {
     try {
@@ -60,9 +67,11 @@ function Post(props) {
     setLikes(isLiked ? likes - 1 : likes + 1);
     setIsLiked(!isLiked);
   };
+
   const setcommentHandler = () => {
-    setCountComments(Countcomments + 1);
+    setCountComments(comments + 1);
   };
+
   const showMenuHandler = () => {
     setShowMenu(!showMenu);
   };
@@ -75,7 +84,7 @@ function Post(props) {
             setShowPost(false);
           }}
         >
-          <ShowPost post={post} newComment={setcommentHandler}></ShowPost>
+          <ShowPost post={post} comments={props.comments} ></ShowPost>
         </Modal>
       )}
       <PostContainer>
@@ -135,7 +144,7 @@ function Post(props) {
                 setShowPost(true);
               }}
             >
-              {likes} Likes {Countcomments} Comments
+              {likes} Likes {comments} Comments
             </span>
           </div>
         </div>
@@ -144,7 +153,7 @@ function Post(props) {
   );
 }
 const PostContainer = styled.div`
-  width: 99%;
+  width: 490px;
   border-radius: 10px;
   border: 1px solid rgb(211, 211, 211);
   -webkit-box-shadow: 0px 0px 16px -8px rgba(0, 0, 0, 0.68);

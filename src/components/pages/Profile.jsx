@@ -7,7 +7,6 @@ import { useParams } from "react-router-dom";
 import Modal from "../UI/Modal";
 import EditProfile from "../EditProfile";
 import { AuthContext } from "../../contexts/AuthContext/AuthContext";
-import Intercept from "../../Tools/refrech";
 
 function Profile(props) {
   const username = useParams().username;
@@ -19,8 +18,6 @@ function Profile(props) {
     followers: [],
     followings: [],
   });
-  const axiosJWT = axios.create();
-  Intercept(axiosJWT);
   const hideEditProfileHandler = () => {
     setshowEditProfile(false);
   };
@@ -29,12 +26,13 @@ function Profile(props) {
     setshowEditProfile(true);
   };
   useEffect(() => {
-    setFollowed(currentUser.data.followings.includes(user?._id));
-  }, [currentUser.data.followings, user._id]);
+    setFollowed(currentUser.data.followings?.includes(user?.userid));
+  }, [currentUser.data.followings, user.userid]);
+
   const followHandler = async () => {
     try {
       if (followed) {
-        await axiosJWT.put(
+        await axios.put(
           `http://localhost:8000/api/user/${username}/unfollow`,
           {},
           {
@@ -43,7 +41,7 @@ function Profile(props) {
         );
         dispatch({ type: "UNFOLLOW", payload: user._id });
       } else {
-        await axiosJWT.put(
+        await axios.put(
           `http://localhost:8000/api/user/${username}/follow`,
           {},
           {

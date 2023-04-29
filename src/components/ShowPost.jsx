@@ -3,52 +3,30 @@ import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { NotificationManager } from "react-notifications";
 import { AuthContext } from "../contexts/AuthContext/AuthContext";
-import Intercept from "../Tools/refrech";
 
 function ShowPost(props) {
   const { user } = useContext(AuthContext);
   const [yourComment, setYourComment] = useState(null);
-  const [comments, setComments] = useState([]);
-  const axiosJWT = axios.create();
-  Intercept(axiosJWT);
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       const submitData = {};
-      submitData.articleId = props.post._id;
-      submitData.description = yourComment;
-      await axiosJWT.post("http://localhost:8000/api/comment/", submitData, {
-        headers: { Authorization: "Bearer " + user.accessToken },
+      submitData.postid = props.post.postid;
+      submitData.content = yourComment;
+      submitData.userid=user.data.userid
+
+      await axios.post(`${process.env.REACT_APP_SERVER_API}/comment/create`, submitData, {
+        headers: { Authorization: "Bearer " + user.data.accessToken.accessToken },
       });
-      const newComment = {};
-      newComment.username = user.data.username;
-      newComment.userPicture = user.data.profilePicture;
-      newComment.description = submitData.description;
-      newComment._id = Math.random();
-      setComments((comments) => [newComment, ...comments]);
-      props.newComment();
+
+
+      
       NotificationManager.success("Success", "Comment has been created", 3000);
     } catch (error) {
       NotificationManager.error("Error", "Warning", 3000);
     }
   };
-  useEffect(() => {
-    const fetchComment = async () => {
-      const res = await axios.get(
-        `http://localhost:8000/api/comment/${props.post._id}`
-      );
 
-      res.data.comments.forEach(async (comment) => {
-        const res = await axios.get(
-          `http://localhost:8000/api/user/${comment.user}`
-        );
-        comment.username = res.data.user.username;
-        comment.userPicture = res.data.user.profilePicture;
-        setComments((comments) => [comment, ...comments]);
-      });
-    };
-    fetchComment();
-  }, [props.post._id]);
   return (
     <ShowPostContainer>
       <div className="addComment">
@@ -63,14 +41,15 @@ function ShowPost(props) {
         </button>
       </div>
       <div className="showComments">
-        {comments.map((comment) => (
-          <div key={comment._id} className="oneComment">
+        
+        {props.comments?.map((comment) => (
+          <div key={comment.commentid} className="oneComment">
             <div className="pictureUserCommentWrapper">
-              <img className="pictureUser" src={comment.userPicture} alt="" />
+              <img className="pictureUser" src={comment.avatar} alt="" />
             </div>
             <div className="usernameAndCommentWrapper">
               <span className="usernameComment">{comment.username}</span>
-              <span className="Comment">{comment.description}</span>
+              <span className="Comment">{comment.content}</span>
             </div>
           </div>
         ))}
