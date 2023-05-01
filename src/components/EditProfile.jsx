@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import Intercept from "../Tools/refrech";
 import { AuthContext } from "../contexts/AuthContext/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,36 +12,46 @@ function EditProfile(props) {
   const [file, setFile] = useState();
   const [picture, setPicture] = useState(user.data.profilePicture);
   const [username, setUsername] = useState(user.data.username);
-  const [email, setEmail] = useState(user.data.email);
-  const axiosJWT = axios.create();
-  Intercept(axiosJWT);
+  const [fullname, setFullname] = useState(user.data.fullname);
+
+
+  const uploadImage=async(file)=>{
+    const formDataFile = new FormData();
+
+    formDataFile.append("file", file);
+    formDataFile.append("upload_preset", "raw8ntho");
+    await axios.post(
+      "https://api.cloudinary.com/v1_1/YOUR_UPLOAD_PRESET/image/upload",
+      formDataFile
+    );
+  }
   const EditHandler = async (e) => {
     e.preventDefault();
     e.currentTarget.disabled = true;
-    const UpdateData = { description, username, email };
+    const UpdateData = { description, username, fullname };
     try {
-      const formDataFile = new FormData();
+      
       if (file) {
-        formDataFile.append("file", file);
-        formDataFile.append("upload_preset", "raw8ntho");
-        const img = await axios.post(
-          "https://api.cloudinary.com/v1_1/YOUR_UPLOAD_PRESET/image/upload",
-          formDataFile
-        );
-        UpdateData.profilePicture = img.data.secure_url;
+        UpdateData.profilePicture = await uploadImage()
       }
-      const res = await axiosJWT.put(
-        `http://localhost:8000/api/user/${user.data._id}`,
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_SERVER_API}/user/update/information/${user.data.userid}`,
         UpdateData,
         {
-          headers: { Authorization: "Bearer " + user.accessToken },
+          headers: { 
+            Authorization: "Bearer " + user.accessToken ,
+            ContentType: "application/json"
+        },
         }
       );
-      dispatch({ type: "UPDATE_DATA", payload: res.data.user });
+      console.log(res.data.user[0])
+      dispatch({ type: "UPDATE_DATA", payload: res.data.user[0] });
+
       props.onClose();
       navigate(`/profile/${username}`);
     } catch (error) {
-      NotificationManager.error(error.response.data.message, "Warning", 3000);
+      // NotificationManager.error(error.response.data.message, "Warning", 3000);
       props.onClose();
     }
   };
@@ -76,27 +85,33 @@ function EditProfile(props) {
         <div className="editProfileRight">
           <form className="editProfileBox">
             <div className="editProfileBoxInput">
+              Username: 
               <input
                 type="text"
                 className="BoxInput"
                 placeholder="Username"
+                value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="editProfileBoxInput">
+              Description: 
               <input
                 type="textarea"
                 className="BoxInput"
                 placeholder="Bio"
+                value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
             <div className="editProfileBoxInput">
+              Full name:
               <input
                 type="email"
                 className="BoxInput"
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="full name"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
               />
             </div>
             <div className="editProfileBoxInput">

@@ -26,39 +26,39 @@ function Profile(props) {
     setshowEditProfile(true);
   };
   useEffect(() => {
-    setFollowed(currentUser.data.followings?.includes(user?.userid));
-  }, [currentUser.data.followings, user.userid]);
+    setFollowed(currentUser.data?.followings?.includes(user?.userid));
+  }, [currentUser.data, user?.userid]);
 
   const followHandler = async () => {
     try {
-      if (followed) {
-        await axios.put(
-          `http://localhost:8000/api/user/${username}/unfollow`,
-          {},
-          {
-            headers: { Authorization: "Bearer " + currentUser.accessToken },
-          }
-        );
-        dispatch({ type: "UNFOLLOW", payload: user._id });
-      } else {
-        await axios.put(
-          `http://localhost:8000/api/user/${username}/follow`,
-          {},
-          {
-            headers: { Authorization: "Bearer " + currentUser.accessToken },
-          }
-        );
-        dispatch({ type: "FOLLOW", payload: user._id });
-      }
-      setFollowed(!followed);
+      // if (followed) {
+      //   await axios.put(
+      //     `http://localhost:8000/api/user/${username}/unfollow`,
+      //     {},
+      //     {
+      //       headers: { Authorization: "Bearer " + currentUser.accessToken },
+      //     }
+      //   );
+      //   dispatch({ type: "UNFOLLOW", payload: user._id });
+      // } else {
+      //   await axios.put(
+      //     `http://localhost:8000/api/user/${username}/follow`,
+      //     {},
+      //     {
+      //       headers: { Authorization: "Bearer " + currentUser.accessToken },
+      //     }
+      //   );
+      //   dispatch({ type: "FOLLOW", payload: user._id });
+      // }
+      // setFollowed(!followed);
     } catch (e) {}
   };
   useEffect(() => {
     const fetchUser = async () => {
       const res = await axios.get(
-        "http://localhost:8000/api/user/u/" + username
+        `${process.env.REACT_APP_SERVER_API}/user/get/by-username/${username}`
       );
-      setCurrentUser(res.data.user);
+      setCurrentUser(res.data.user[0]);
       const pst = await axios.get(
         "http://localhost:8000/api/article/u/" + username
       );
@@ -74,7 +74,7 @@ function Profile(props) {
     <>
       {showEditProfile && (
         <Modal onClose={hideEditProfileHandler}>
-          <EditProfile onClose={hideEditProfileHandler} />
+          <EditProfile onClose={hideEditProfileHandler} user={currentUser}/>
         </Modal>
       )}
       <Topbar
@@ -85,14 +85,14 @@ function Profile(props) {
         <div className="profileWrapper">
           <div className="profilePicture">
             <img
-              src={user.profilePicture}
+              src={currentUser.data?.profilePicture}
               alt=""
               className="ProfilePictureImg"
             />
           </div>
           <div className="profileData">
             <div className="profileSettings">
-              <span className="profileSettingsUsername">{user.username}</span>
+              <span className="profileSettingsUsername">{user?.username}</span>
               {currentUser.data.username === username ? (
                 <>
                   <a
@@ -117,20 +117,20 @@ function Profile(props) {
             <div className="profileInfo">
               <span className="profileInfoPost">
                 <span className="profileInfoNum"></span>
-                {posts.length} Posts
+                {posts?.length || 0} Posts
               </span>
               <span className="profileInfoFollowers">
                 <span className="profileInfoNum"></span>
-                {user.followers.length} followers
+                {user?.followers?.length || 0} followers
               </span>
               <span className="profileInfoFollowings">
                 <span className="profileInfoNum"></span>
-                {user.followings.length} followings
+                {user?.followings?.length || 0} followings
               </span>
             </div>
             <div className="profileBio">
-              <span className="profileBioUsername">{user.username}</span>
-              <span className="profileBioBio">{user.description}</span>
+              <span className="profileBioUsername">{user?.fullname}</span>
+              <span className="profileBioBio">{user?.description}</span>
             </div>
           </div>
         </div>
@@ -138,7 +138,7 @@ function Profile(props) {
       <ProfilePosts>
         <div className="postsWrapper">
           {posts.map((p) => (
-            <div key={p._id} className="profilePostWrapper">
+            <div key={p.postid} className="profilePostWrapper">
               <div className="profilePost">
                 <img
                   src={
