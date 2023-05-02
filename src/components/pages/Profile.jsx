@@ -14,10 +14,11 @@ function Profile(props) {
   const [posts, setPosts] = useState([]);
   const [followed, setFollowed] = useState(true);
   const [showEditProfile, setshowEditProfile] = useState(false);
-  const [user, setCurrentUser] = useState({
+  const [user, setCurrentUser] = useState();
+  const [list,setList]=useState({
     followers: [],
     followings: [],
-  });
+  })
   const hideEditProfileHandler = () => {
     setshowEditProfile(false);
   };
@@ -44,6 +45,7 @@ function Profile(props) {
       console.log(err)
     }
   };
+  
   useEffect(() => {
     const fetchUser = async () => {
       const res = await axios.get(
@@ -60,10 +62,32 @@ function Profile(props) {
       .catch(err=>{
         console.log(err)
       })
+
+      await axios.get(
+        `${process.env.REACT_APP_SERVER_API}/follow/follower/${username}`
+      )
+      .then(res=>{
+          setList({...list,followers:res.data.list})
+      })
+      .catch(err=>{
+        console.log(err)
+      })
+
+      await axios.get(
+        `${process.env.REACT_APP_SERVER_API}/follow/following/${username}`
+      )
+      .then(res=>{
+        setList({...list,followings: res.data.list})
+      })
+      .catch(err=>{
+        console.log(err)
+      })
     };
     fetchUser();
   }, [username]);
 
+
+  // follow activity
   useEffect(() => {
     async function fetch() {
       currentUser&& await axios.post(`${process.env.REACT_APP_SERVER_API}/follow/is-followed/${username}`,
@@ -140,11 +164,11 @@ function Profile(props) {
               </span>
               <span className="profileInfoFollowers">
                 <span className="profileInfoNum"></span>
-                {user?.followers?.length || 0} followers
+                {list.followers?.length || 0} followers
               </span>
               <span className="profileInfoFollowings">
                 <span className="profileInfoNum"></span>
-                {user?.followings?.length || 0} followings
+                {list?.followings?.length || 0} followings
               </span>
             </div>
             <div className="profileBio">
