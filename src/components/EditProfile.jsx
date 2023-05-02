@@ -4,27 +4,20 @@ import { AuthContext } from "../contexts/AuthContext/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { NotificationManager } from "react-notifications";
+import { uploadImage } from "../util/function/uploadImage";
+
 
 function EditProfile(props) {
   const navigate = useNavigate();
   const { user, dispatch } = useContext(AuthContext);
   const [description, setDescription] = useState(user.data.description);
   const [file, setFile] = useState();
-  const [picture, setPicture] = useState(user.data.profilePicture);
+  const [picture, setPicture] = useState(user.data.avatar);
   const [username, setUsername] = useState(user.data.username);
   const [fullname, setFullname] = useState(user.data.fullname);
 
+  console.log(user.data)
 
-  const uploadImage=async(file)=>{
-    const formDataFile = new FormData();
-
-    formDataFile.append("file", file);
-    formDataFile.append("upload_preset", "raw8ntho");
-    await axios.post(
-      "https://api.cloudinary.com/v1_1/YOUR_UPLOAD_PRESET/image/upload",
-      formDataFile
-    );
-  }
   const EditHandler = async (e) => {
     e.preventDefault();
     e.currentTarget.disabled = true;
@@ -32,9 +25,10 @@ function EditProfile(props) {
     try {
       
       if (file) {
-        UpdateData.profilePicture = await uploadImage()
+        const img= await uploadImage(file)
+        UpdateData.avatar = img.data.image
       }
-
+      console.log(UpdateData)
       const res = await axios.post(
         `${process.env.REACT_APP_SERVER_API}/user/update/information/${user.data.userid}`,
         UpdateData,

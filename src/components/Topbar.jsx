@@ -129,7 +129,7 @@ function Topbar(props) {
                 setShowMenu(!showMenu);
               }}
               alt=""
-              src={user.data.profilePicture}
+              src={user.data.avatar}
             />
             {showMenu && (
               <div className="TopbarMenu">

@@ -23,7 +23,7 @@ const AuthReducer = (state, action) => {
         },
       };
     case "UPDATE_DATA":
-      return { ...state, user: { ...state.user, data: action.payload } };
+      return { ...state, user: {  data: {...state.user.data,...action.payload} } };
     case "UNFOLLOW":
       return {
         ...state,

@@ -13,7 +13,7 @@ import Backdrop from "./UI/Backdrop";
 
 function Post(props) {
   const post = props.post;
-  
+  // console.log(post)
   const { user } = useContext(AuthContext);
 
   const [likes, setLikes] = useState(0);
@@ -90,7 +90,7 @@ function Post(props) {
       <PostContainer>
         <div className="postTop">
           <div className="postTopLeft">
-            <Link to={"/profile/" + post.user?.username}>
+            <Link to={"/profile/" + post.username}>
               <img
                 src={post.avatar}
                 alt=""
@@ -100,7 +100,7 @@ function Post(props) {
 
             <Link
               style={{ textDecoration: "none", color: "#000000" }}
-              to={"/profile/" + post.user?.username}
+              to={"/profile/" + post.username}
             >
               <span className="postUsername">{post.username}</span>
             </Link>

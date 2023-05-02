@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { AuthContext } from "../contexts/AuthContext/AuthContext";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import Intercept from "../Tools/refrech";
+import Intercept from "../util/refrech";
 
 function Rightbar() {
   const { user, dispatch } = useContext(AuthContext);
@@ -36,7 +36,7 @@ function Rightbar() {
                   to={"/profile/" + f.username}
                 >
                   <img
-                    src={f.profilePicture}
+                    src={f.avatar}
                     alt=""
                     className="rightbarFollowingImg"
                   />

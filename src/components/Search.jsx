@@ -17,8 +17,8 @@ function Search({ data, hideSearch }) {
                 <div className="userRight">
                   <img
                     src={
-                      u.profilePicture
-                        ? u.profilePicture
+                      u.avatar
+                        ? u.avatar
                         : "person/noAvatar.png"
                     }
                     alt=""

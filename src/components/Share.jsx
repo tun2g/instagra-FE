@@ -5,6 +5,7 @@ import { MdPermMedia } from "react-icons/md";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext/AuthContext";
 import { NotificationManager } from "react-notifications";
+import { uploadImage } from "../util/function/uploadImage";
 
 function Share(props) {
   const navigate = useNavigate();
@@ -19,22 +20,12 @@ function Share(props) {
     formDataInfo.description = desc.current.value;
 
     try {
-      const formDataFile = new FormData();
       if (file) {
-        formDataFile.append("file", file,"file");
+        const img=await uploadImage(file)
 
-        const img = await axios.post(
-          `${process.env.REACT_APP_SERVER_API}/files/upload`,
-              formDataFile
-          ,
-          {
-            headers:{
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
         formDataInfo.imageurl = img.data.image;
         formDataInfo.userid=user.data.userid
+
         console.log(formDataInfo)
         await axios.post(`${process.env.REACT_APP_SERVER_API}/post/create`, formDataInfo, {
           headers: {

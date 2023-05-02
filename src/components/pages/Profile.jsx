@@ -25,33 +25,24 @@ function Profile(props) {
     e.preventDefault();
     setshowEditProfile(true);
   };
-  useEffect(() => {
-    setFollowed(currentUser.data?.followings?.includes(user?.userid));
-  }, [currentUser.data, user?.userid]);
 
   const followHandler = async () => {
     try {
-      // if (followed) {
-      //   await axios.put(
-      //     `http://localhost:8000/api/user/${username}/unfollow`,
-      //     {},
-      //     {
-      //       headers: { Authorization: "Bearer " + currentUser.accessToken },
-      //     }
-      //   );
-      //   dispatch({ type: "UNFOLLOW", payload: user._id });
-      // } else {
-      //   await axios.put(
-      //     `http://localhost:8000/api/user/${username}/follow`,
-      //     {},
-      //     {
-      //       headers: { Authorization: "Bearer " + currentUser.accessToken },
-      //     }
-      //   );
-      //   dispatch({ type: "FOLLOW", payload: user._id });
-      // }
-      // setFollowed(!followed);
-    } catch (e) {}
+      await axios.post(`${process.env.REACT_APP_SERVER_API}/follow/activity`,
+      {
+        userid:currentUser.data.userid,
+        followuser:user.userid
+      },
+      {
+        headers:{
+          ContentType:"application/json",
+        }
+      }
+      )
+      setFollowed(!followed)
+    } catch (err) {
+      console.log(err)
+    }
   };
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,17 +50,41 @@ function Profile(props) {
         `${process.env.REACT_APP_SERVER_API}/user/get/by-username/${username}`
       );
       setCurrentUser(res.data.user[0]);
-      const pst = await axios.get(
-        "http://localhost:8000/api/article/u/" + username
-      );
-      setPosts(
-        pst.data.sort((p1, p2) => {
-          return new Date(p2.createdAt) - new Date(p1.createdAt);
-        })
-      );
+
+      await axios.get(
+        `${process.env.REACT_APP_SERVER_API}/post/get-post-user/${username}`
+      )
+      .then(res=>{
+        setPosts(res.data.list)
+      })
+      .catch(err=>{
+        console.log(err)
+      })
     };
     fetchUser();
   }, [username]);
+
+  useEffect(() => {
+    async function fetch() {
+      currentUser&& await axios.post(`${process.env.REACT_APP_SERVER_API}/follow/is-followed/${username}`,
+      {
+        userid:currentUser.data.userid
+      },
+      {
+        headers:{
+          ContentType:"application/json"
+        }
+      }
+      )
+      .then(res=>{
+          setFollowed(res.data.isFollowed>0?true:false)
+      })
+      .catch(err=>{
+        console.log(err)
+      })
+    }
+    fetch()
+  }, []);
   return (
     <>
       {showEditProfile && (
@@ -85,7 +100,7 @@ function Profile(props) {
         <div className="profileWrapper">
           <div className="profilePicture">
             <img
-              src={currentUser.data?.profilePicture}
+              src={currentUser.data?.avatar}
               alt=""
               className="ProfilePictureImg"
             />
@@ -105,7 +120,10 @@ function Profile(props) {
 
                   <FiSettings className="profileSettingsIcon" />
                 </>
-              ) : (
+              ) 
+              :
+              //Profile other 
+              (
                 <button
                   className="rightbarFollowButton"
                   onClick={followHandler}
@@ -113,6 +131,7 @@ function Profile(props) {
                   {followed ? "Unfollow" : "Follow"}
                 </button>
               )}
+
             </div>
             <div className="profileInfo">
               <span className="profileInfoPost">
@@ -142,8 +161,8 @@ function Profile(props) {
               <div className="profilePost">
                 <img
                   src={
-                    p.imgurl
-                      ? p.imgurl
+                    p.imageurl
+                      ? p.imageurl
                       : "http://localhost:3002/images/defaultpost.jpg"
                   }
                   alt=""

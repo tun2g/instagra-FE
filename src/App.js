@@ -41,7 +41,7 @@ function App() {
             path="/profile/:username"
             element={
               user ? (
-                <Profile rerenderFeed={rerenderFeed} onChange={handleChange} />
+                <Profile />
               ) : (
                 <Navigate to="/login" />
               )
